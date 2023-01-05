@@ -37,7 +37,7 @@ describe("sell-nft", async () => {
     }).signers([authority]).rpc();
     console.log("Your transaction signature", tx);
 
-    const tx2 = await program.methods.getBack().accounts({
+    const tx2 = await program.methods.getBack(bump).accounts({
       nftMint: mint,
       nftTokenAccount: pdaTokenAccount.address,
       nftPda: nftPda,

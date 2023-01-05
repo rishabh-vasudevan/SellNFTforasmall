@@ -1,13 +1,11 @@
 use anchor_lang::{prelude::*, system_program};
-use anchor_spl::{token};
+use anchor_spl::token;
 
 declare_id!("HgdZU356qBiVDeNrEsuSbyQ4wGvYdUdhVJpirAFzaPtf");
 
 #[program]
 pub mod sell_nft {
-    use anchor_lang::solana_program::{
-        native_token::LAMPORTS_PER_SOL
-    };
+    use anchor_lang::solana_program::native_token::LAMPORTS_PER_SOL;
 
     use super::*;
 
@@ -46,13 +44,28 @@ pub mod sell_nft {
         Ok(())
     }
 
-    pub fn get_back(ctx: Context<GetBack>) -> Result<()> {
+    pub fn get_back(ctx: Context<GetBack>, bump:u8) -> Result<()> {
         system_program::transfer(
             CpiContext::new(
                 ctx.accounts.system_program.to_account_info(),
-                system_program::Transfer { from: ctx.accounts.authority.to_account_info(), to: ctx.accounts.nft_pda.to_account_info() },
+                system_program::Transfer {
+                    from: ctx.accounts.authority.to_account_info(),
+                    to: ctx.accounts.nft_pda.to_account_info(),
+                },
             ),
-            LAMPORTS_PER_SOL/100000000,
+            LAMPORTS_PER_SOL / 100000000,
+        )?;
+
+        token::transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                token::Transfer {
+                    from: ctx.accounts.nft_token_account.to_account_info(), 
+                    to: ctx.accounts.token_account.to_account_info(),
+                    authority: ctx.accounts.nft_pda.to_account_info(),
+                },
+            ).with_signer(&[&[ctx.accounts.authority.key.as_ref(), b"nft_holder".as_ref(), &[bump]][..]]),
+            1,
         )?;
         Ok(())
     }
@@ -93,4 +106,5 @@ pub struct GetBack<'info> {
     #[account(mut)]
     authority: Signer<'info>,
     system_program: Program<'info, System>,
+    token_program: Program<'info, token::Token>,
 }
