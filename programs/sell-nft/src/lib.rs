@@ -11,7 +11,7 @@ pub mod sell_nft {
 
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>, bump: u8) -> Result<()> {
+    pub fn initialize(ctx: Context<SellNFT>, bump: u8) -> Result<()> {
         assert!(
             ctx.accounts.nft_mint.supply == 1 && ctx.accounts.nft_mint.mint_authority.is_none(),
             "The NFT should have 1 token supply and no mint authority"
@@ -59,7 +59,7 @@ pub mod sell_nft {
 }
 
 #[derive(Accounts)]
-pub struct Initialize<'info> {
+pub struct SellNFT<'info> {
     ///CHECK: We are goind to create this account
     #[account(mut, seeds = [authority.key.as_ref(), b"nft_holder".as_ref()], bump)]
     nft_pda: AccountInfo<'info>,
